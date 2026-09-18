@@ -45,7 +45,7 @@ optionally libsecret (keyring passwords) and flex (regenerating the lexer).
 # Debian/Ubuntu:  sudo apt install cmake qt6-base-dev libqt6svg6-dev libmariadb-dev libsecret-1-dev flex
 # Fedora:         sudo dnf install cmake qt6-qtbase-devel qt6-qtsvg-devel mariadb-connector-c-devel libsecret-devel flex
 
-git clone https://github.com/<you>/sequel-ace-omarchy.git
+git clone https://github.com/mateusmetzker/sequel-ace-omarchy.git
 cd sequel-ace-omarchy
 cmake -S . -B build -DCMAKE_BUILD_TYPE=Release
 cmake --build build -j"$(nproc)"
