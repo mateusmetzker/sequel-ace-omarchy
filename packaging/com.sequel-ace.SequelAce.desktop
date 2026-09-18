@@ -1,0 +1,13 @@
+[Desktop Entry]
+Type=Application
+Name=Sequel Ace
+GenericName=Database Client
+Comment=MySQL and MariaDB database management
+Exec=sequel-ace %f
+Icon=com.sequel-ace.SequelAce
+Terminal=false
+Categories=Development;Database;
+MimeType=application/x-sequel-ace-connection;application/sql;
+Keywords=mysql;mariadb;sql;database;
+StartupNotify=true
+StartupWMClass=sequel-ace

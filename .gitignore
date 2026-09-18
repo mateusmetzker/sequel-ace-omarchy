@@ -1,0 +1,6 @@
+/build/
+/build-*/
+/.build-pkg/
+/dist/
+compile_commands.json
+*.pkg.tar.*

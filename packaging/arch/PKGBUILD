@@ -1,0 +1,33 @@
+# Maintainer: Sequel Ace contributors
+# Builds the Qt 6 Linux port of Sequel Ace from a source tarball.
+# scripts/make-package.sh creates that tarball from the working copy and
+# runs makepkg; the PKGBUILD can also be used standalone with a tarball
+# named sequel-ace-<pkgver>.tar.gz that unpacks to sequel-ace-<pkgver>/.
+
+pkgname=sequel-ace
+pkgver=0.1.0
+pkgrel=1
+pkgdesc="MySQL and MariaDB database management (Qt 6 Linux port of Sequel Ace)"
+arch=('x86_64' 'aarch64')
+url="https://sequel-ace.com"
+license=('MIT')
+depends=('qt6-base' 'qt6-svg' 'mariadb-libs' 'libsecret' 'hicolor-icon-theme')
+optdepends=('openssh: connections through SSH tunnels'
+            'gnome-keyring: persistent password storage through the Secret Service API')
+makedepends=('cmake' 'flex' 'pkgconf')
+options=('!debug')
+source=("$pkgname-$pkgver.tar.gz")
+sha256sums=('SKIP')
+
+build() {
+    cmake -S "$pkgname-$pkgver" -B build \
+        -DCMAKE_BUILD_TYPE=Release \
+        -DCMAKE_INSTALL_PREFIX=/usr \
+        -DSA_BUILD_TESTS=OFF
+    cmake --build build
+}
+
+package() {
+    DESTDIR="$pkgdir" cmake --install build
+    install -Dm644 "$pkgname-$pkgver/LICENSE" "$pkgdir/usr/share/licenses/$pkgname/LICENSE"
+}

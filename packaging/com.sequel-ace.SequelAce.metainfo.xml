@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<component type="desktop-application">
+  <id>com.sequel-ace.SequelAce</id>
+  <name>Sequel Ace</name>
+  <summary>MySQL and MariaDB database management</summary>
+  <metadata_license>CC0-1.0</metadata_license>
+  <project_license>MIT</project_license>
+  <description>
+    <p>Sequel Ace is a fast, easy-to-use database management application for working with MySQL and MariaDB databases. This is the Linux port of the macOS application.</p>
+    <p>Browse and edit table content, edit table structure, indexes, relations and triggers, run custom SQL with syntax highlighting and completion, and connect over TCP/IP, UNIX sockets or SSH tunnels.</p>
+  </description>
+  <launchable type="desktop-id">com.sequel-ace.SequelAce.desktop</launchable>
+  <url type="homepage">https://sequel-ace.com</url>
+  <url type="bugtracker">https://github.com/Sequel-Ace/Sequel-Ace/issues</url>
+  <provides>
+    <binary>sequel-ace</binary>
+  </provides>
+  <content_rating type="oars-1.1" />
+</component>
