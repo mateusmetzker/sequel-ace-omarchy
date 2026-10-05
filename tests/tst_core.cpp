@@ -10,6 +10,7 @@
 #include "SAConnectionInfo.h"
 #include "SAContentEditing.h"
 #include "SAContentFilters.h"
+#include "SADatabaseSession.h"
 #include "SAEditorTheme.h"
 #include "SAFavoritesStore.h"
 #include "SAFilterTree.h"
@@ -1012,6 +1013,50 @@ private Q_SLOTS:
         // CR inside a quoted literal is data.
         QCOMPARE(SASQLSplitter::normaliseForExecution(QStringLiteral("SELECT 'a\r\nb'")), QStringLiteral("SELECT 'a\r\nb'"));
         QCOMPARE(SASQLSplitter::normaliseForExecution(QStringLiteral("SELECT `a\rb`")), QStringLiteral("SELECT `a\rb`"));
+    }
+
+    // ---- session -------------------------------------------------------------
+    // The sessions below never connect: every query fails at once, and NoRetry
+    // keeps the worker from attempting a reconnect.
+    void session_queryWithContext_deliversWhileContextAlive()
+    {
+        SADatabaseSession session;
+        QObject context;
+        bool called = false;
+        session.query(QStringLiteral("SELECT 1"), &context, [&called](const SAResult &) { called = true; }, SADatabaseSession::NoRetry);
+        QTRY_VERIFY(called);
+        QVERIFY(!session.isBusy());
+    }
+    void session_queryWithContext_dropsHandlerOnceContextIsDestroyed()
+    {
+        SADatabaseSession session;
+        auto *context = new QObject;
+        bool called = false;
+        session.query(QStringLiteral("SELECT 1"), context, [&called](const SAResult &) { called = true; }, SADatabaseSession::NoRetry);
+        delete context;
+        QTRY_VERIFY(!session.isBusy());
+        QVERIFY(!called);
+    }
+    void session_queryBatchWithContext_deliversWhileContextAlive()
+    {
+        SADatabaseSession session;
+        QObject context;
+        int delivered = -1;
+        session.queryBatch({QStringLiteral("SELECT 1"), QStringLiteral("SELECT 2")}, &context,
+                           [&delivered](const QVector<SAResult> &results) { delivered = int(results.size()); }, SADatabaseSession::NoRetry);
+        QTRY_COMPARE(delivered, 2);
+        QVERIFY(!session.isBusy());
+    }
+    void session_queryBatchWithContext_dropsHandlerOnceContextIsDestroyed()
+    {
+        SADatabaseSession session;
+        auto *context = new QObject;
+        bool called = false;
+        session.queryBatch({QStringLiteral("SELECT 1"), QStringLiteral("SELECT 2")}, context,
+                           [&called](const QVector<SAResult> &) { called = true; }, SADatabaseSession::NoRetry);
+        delete context;
+        QTRY_VERIFY(!session.isBusy());
+        QVERIFY(!called);
     }
 };
 

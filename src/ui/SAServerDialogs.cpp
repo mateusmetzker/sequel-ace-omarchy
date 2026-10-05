@@ -51,7 +51,7 @@ SAServerVariablesDialog::SAServerVariablesDialog(SADatabaseDocument *document, Q
 
 void SAServerVariablesDialog::reload()
 {
-    m_document->session()->query(QStringLiteral("SHOW VARIABLES"), [this](const SAResult &r) {
+    m_document->session()->query(QStringLiteral("SHOW VARIABLES"), this, [this](const SAResult &r) {
         m_all.clear();
         for (int i = 0; i < r.rowCount(); ++i) m_all.append({r.stringAt(i, 0), r.stringAt(i, 1)});
         filter();
@@ -117,7 +117,7 @@ SAProcessListDialog::SAProcessListDialog(SADatabaseDocument *document, QWidget *
 
 void SAProcessListDialog::reload()
 {
-    m_document->session()->query(m_showFull->isChecked() ? QStringLiteral("SHOW FULL PROCESSLIST") : QStringLiteral("SHOW PROCESSLIST"), [this](const SAResult &r) {
+    m_document->session()->query(m_showFull->isChecked() ? QStringLiteral("SHOW FULL PROCESSLIST") : QStringLiteral("SHOW PROCESSLIST"), this, [this](const SAResult &r) {
         if (!r.ok) { m_status->setText(r.errorMessage); return; }
         const QStringList wanted{QStringLiteral("Id"), QStringLiteral("User"), QStringLiteral("Host"), QStringLiteral("db"), QStringLiteral("Command"), QStringLiteral("Time"), QStringLiteral("State"), QStringLiteral("Info")};
         m_table->setRowCount(r.rowCount());
@@ -147,7 +147,7 @@ void SAProcessListDialog::kill(bool connection)
                             connection ? tr("The connection will be closed and any running query aborted.") : tr("The currently running query of this connection will be aborted."),
                             tr("Kill"), QString(), true)) return;
     const bool tidb = m_document->session()->serverInfo().versionString.contains(QLatin1String("TiDB"), Qt::CaseInsensitive);
-    m_document->session()->query(connection ? SASchema::killConnection(id, tidb) : SASchema::killQuery(id, tidb), [this](const SAResult &r) {
+    m_document->session()->query(connection ? SASchema::killConnection(id, tidb) : SASchema::killQuery(id, tidb), this, [this](const SAResult &r) {
         if (!r.ok) m_document->reportError(tr("Error"), tr("Unable to kill.\n\nMySQL said: %1").arg(r.errorMessage));
         reload();
     });
