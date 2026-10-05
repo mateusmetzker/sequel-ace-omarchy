@@ -490,7 +490,7 @@ void SAExportDialog::exportNextTable()
 
     QStringList statements{SASchema::showFullColumns(m_currentTable)};
     if (sql && m_sqlStructure->isChecked()) statements << SASchema::showCreate(SASchema::ObjectType::Table, m_currentTable);
-    m_document->session()->queryBatch(statements, [this, sql](const QVector<SAResult> &results) {
+    m_document->session()->queryBatch(statements, this, [this, sql](const QVector<SAResult> &results) {
         if (results.isEmpty() || !results[0].ok) { finish(tr("Could not read the structure of %1.").arg(m_currentTable), true); return; }
         m_currentColumns = SASchema::parseColumns(results[0], m_document->session()->serverInfo().isMariaDB);
         if (sql) {
@@ -516,7 +516,7 @@ void SAExportDialog::fetchBatch()
     for (const SASchema::Column &c : m_currentColumns) fields << SADatabaseSession::quoteIdentifier(c.name);
     const QString sql = SAResultExport::batchSelect(SADatabaseSession::quoteIdentifier(m_currentTable), fields,
                                                     m_where, m_orderBy, m_offset, BatchSize);
-    m_document->session()->query(sql, [this](const SAResult &r) {
+    m_document->session()->query(sql, this, [this](const SAResult &r) {
         if (!r.ok) { finish(tr("Error reading %1: %2").arg(m_currentTable, r.errorMessage), true); return; }
         writeRows(r.fields, r.rows, m_currentTable);
         m_rowsWritten += quint64(r.rowCount());

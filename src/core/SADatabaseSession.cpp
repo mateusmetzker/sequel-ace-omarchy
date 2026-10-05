@@ -337,6 +337,24 @@ void SADatabaseSession::queryBatch(const QStringList &statements, BatchHandler h
     }, Qt::QueuedConnection);
 }
 
+// The guard is checked on the session's thread, where the context is destroyed,
+// and the unguarded overload still runs endTask() when the handler is skipped.
+void SADatabaseSession::query(const QString &sql, QObject *context, ResultHandler handler, QueryFlags flags)
+{
+    QPointer<QObject> alive(context);
+    query(sql, [alive, handler = std::move(handler)](const SAResult &r) {
+        if (alive && handler) handler(r);
+    }, flags);
+}
+
+void SADatabaseSession::queryBatch(const QStringList &statements, QObject *context, BatchHandler handler, QueryFlags flags, bool stopOnError)
+{
+    QPointer<QObject> alive(context);
+    queryBatch(statements, [alive, handler = std::move(handler)](const QVector<SAResult> &results) {
+        if (alive && handler) handler(results);
+    }, flags, stopOnError);
+}
+
 void SADatabaseSession::selectDatabase(const QString &database, ConnectHandler done)
 {
     beginTask();

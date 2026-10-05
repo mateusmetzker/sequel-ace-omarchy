@@ -77,6 +77,9 @@ public:
     // Asynchronous statement execution.
     void query(const QString &sql, ResultHandler handler, QueryFlags flags = NoFlags);
     void queryBatch(const QStringList &statements, BatchHandler handler, QueryFlags flags = NoFlags, bool stopOnError = false);
+    // The handler is skipped when context is destroyed before the result arrives.
+    void query(const QString &sql, QObject *context, ResultHandler handler, QueryFlags flags = NoFlags);
+    void queryBatch(const QStringList &statements, QObject *context, BatchHandler handler, QueryFlags flags = NoFlags, bool stopOnError = false);
     void selectDatabase(const QString &database, ConnectHandler done);
     void setEncoding(const QString &encoding, ConnectHandler done);
     void cancelCurrentQuery();

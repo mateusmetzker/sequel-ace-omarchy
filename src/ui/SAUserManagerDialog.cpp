@@ -204,11 +204,11 @@ void SAUserManagerDialog::buildSchemaPrivilegesTab()
 
 void SAUserManagerDialog::reload()
 {
-    m_document->session()->query(showPrivileges(), [this](const SAResult &privResult) {
+    m_document->session()->query(showPrivileges(), this, [this](const SAResult &privResult) {
         if (privResult.ok) m_supportedGlobalPrivs = parseSupportedPrivileges(privResult);
-        m_document->session()->query(showColumnsFromUserTable(), [this](const SAResult &colResult) {
+        m_document->session()->query(showColumnsFromUserTable(), this, [this](const SAResult &colResult) {
             if (m_supportedGlobalPrivs.isEmpty()) m_supportedGlobalPrivs = parseSupportedPrivilegesFromColumns(colResult);
-            m_document->session()->query(QStringLiteral("SHOW COLUMNS FROM mysql.db"), [this](const SAResult &dbColResult) {
+            m_document->session()->query(QStringLiteral("SHOW COLUMNS FROM mysql.db"), this, [this](const SAResult &dbColResult) {
                 m_supportedSchemaPrivs = parseSupportedPrivilegesFromColumns(dbColResult);
 
                 // Rebuild the global-privileges checkbox grid now that the supported set is known.
@@ -226,15 +226,15 @@ void SAUserManagerDialog::reload()
                     grid->addWidget(box, i / columns, i % columns);
                 }
 
-                m_document->session()->query(QStringLiteral("SHOW DATABASES"), [this](const SAResult &dbResult) {
+                m_document->session()->query(QStringLiteral("SHOW DATABASES"), this, [this](const SAResult &dbResult) {
                     m_allDatabases.clear();
                     for (int i = 0; i < dbResult.rowCount(); ++i) m_allDatabases << dbResult.stringAt(i, 0);
 
-                    m_document->session()->query(listUsers(), [this](const SAResult &userResult) {
+                    m_document->session()->query(listUsers(), this, [this](const SAResult &userResult) {
                         if (!userResult.ok) { reportErrors({userResult.errorMessage}); return; }
                         const QVector<SAUserAccount> accounts = parseUsers(userResult, m_post576);
 
-                        m_document->session()->query(listSchemaPrivileges(), [this, accounts](const SAResult &schemaResult) {
+                        m_document->session()->query(listSchemaPrivileges(), this, [this, accounts](const SAResult &schemaResult) {
                             const QVector<SASchemaPrivilege> schemaPrivs = parseSchemaPrivileges(schemaResult);
 
                             m_users.clear();
